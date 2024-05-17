@@ -24,7 +24,7 @@ thick2 = thickness(radius+1:end);
 correct = [];
 for i = 1:984 %size(atten_array,2)
 
-    m = atten_array(:,1000+i).';
+    m = atten_array(:,100+i).';
     % m = mean(atten_array,2).';
     
     roi = m(start:finish);

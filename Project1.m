@@ -6,22 +6,22 @@ close all;
 
 path_raw = './data/raw_sino';
 path_dcm = './data/CAC01_41005/CAC01_41005/Ct Heart Calcium Score Without Contrast/CALCIUM SCORE THIN_302';
-
+path_ref = './ref-functions';
+path_func = './functions';
 
 addpath(path_raw);
 addpath(path_dcm);
-
+addpath(path_ref);
+addpath(path_func);
 
 for i = 1
     file = dir([path_dcm,'/*.dcm']);
     for j = 1:numel(file)
-        data(i).image(j).each_image = dicomread(file(j).name);
-        data(i).image(j).info = dicominfo(file(j).name);
-        data(i).image(j).each_image = (data(i).image(j).each_image*data(i).image(j).info.RescaleSlope)+data(i).image(j).info.RescaleIntercept;
+        data.image(j).each_image = dicomread(file(j).name);
+        data.image(j).info = dicominfo(file(j).name);
+        data.image(j).each_image = (data(i).image(j).each_image*data(i).image(j).info.RescaleSlope)+data(i).image(j).info.RescaleIntercept;
     end
 end
-
-
 
 raw = dir(path_raw);
 label = ["41005",'41006','41007','41008','air scan1','air scan1','air scan2','air scan3','air scan4','air scan5','air scan6','air scan7','air scan8','air scan9','air scan10'];
@@ -32,9 +32,45 @@ for i = 3:numel(raw)
 end
 
 
+
+%% Parameters
+% Set Recon Parameters
+angle_shift=0; % Used to define theta as 0 (rotate images during iRadon)
+img_list=[0]; %the code will stop if it runs out of data
+img_size=512;
+num_views=984;
+
+air_num = 5;
+scan_num = 1;
+
+
 %% segmentation
 
-target = data.image(10).each_image;
+
+
+targe = data.raw_sino(scan_num).file.central_data;
+target = squeeze(targe(:,1,:));
+mA = data.raw_sino(scan_num).file.mA;
+
+[r,c] = size(target);
+
+
+air_sino = squeeze(data.raw_sino(air_num).file.central_data(:,1,1:c));
+air_mA = data.raw_sino(air_num).file.mA(1:c);
+
+% mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
+
+mA_matrix = repmat(mA,1,size(target,1)).';
+
+% for i = 1:14
+%     figure;
+%     imshow(squeeze(data.raw_sino(i).file.central_data(:,1,:)),[])
+% end
+
+% for i = 1:14
+%     figure;
+%     plot(data.raw_sino(i).file.mA);
+% end
 
 
 
@@ -47,32 +83,23 @@ target = data.image(10).each_image;
 
 
 
-%% Parameters
-% Set Recon Parameters
-angle_shift=0; % Used to define theta as 0 (rotate images during iRadon)
-img_list=[0]; %the code will stop if it runs out of data
-img_size=512;
-num_views=984;
+%% Normalization
+sino = target;
+
+n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
+
 
 
 %% Fan to parallel
 
-sino = squeeze(raw.central_data(:,1,:));
+[p_sino,sino_thetas] = convert_to_parallel_wrapper(n_sino,num_views);
+% [p_sino,sino_thetas] = ref_convert_to_parallel(n_sino);
 
-[p_sino,sino_thetas] = convert_to_parallel_wrapper(sino,num_views);
-
-
-
-%% Normalization
-np_sino = p_sino;
-
- 
 
 %% Recon
 
-% [FBP_result] = ref_recon_parallel_beam(np_sino,angle_shift,img_list,img_size,num_views);
+[FBP_result] = ref_recon_parallel_beam(p_sino,angle_shift,img_list,img_size,num_views);
 
-a = iradon(p_sino);
 
 
 
