@@ -4,22 +4,33 @@ close all;
 
 %% Load 
 
-% path(1).air = './data/CAC_AIR01_41005thru41009/CAC_AIR01_41005thru41009/200/study/CAL_SCORE_ASIR-50_0.625_303/*.dcm';
-% path(2).air = './data/CAC_AIR01_41005thru41009/CAC_AIR01_41005thru41009/200/study/CALCIUM_SCORE_STD_AX_301/*.dcm';
-% path(3).air = './data/CAC_AIR01_41005thru41009/CAC_AIR01_41005thru41009/200/study/CALCIUM_SCORE_THIN_302/*.dcm';
+path_raw = './data/raw_sino';
+path_dcm = './data/CAC01_41005/CAC01_41005/Ct Heart Calcium Score Without Contrast/CALCIUM SCORE THIN_302';
 
-path(1).scan = './data/CAC01_41005/CAC01_41005/Ct Heart Calcium Score Without Contrast/CALCIUM SCORE THIN_302/*.dcm';
 
-raw = load('./data/raw_sino/central_scale_scan_41005.2.1.mat');
+addpath(path_raw);
+addpath(path_dcm);
+
 
 for i = 1
-    file = dir(path(i).scan);
+    file = dir([path_dcm,'/*.dcm']);
     for j = 1:numel(file)
         data(i).image(j).each_image = dicomread(file(j).name);
         data(i).image(j).info = dicominfo(file(j).name);
         data(i).image(j).each_image = (data(i).image(j).each_image*data(i).image(j).info.RescaleSlope)+data(i).image(j).info.RescaleIntercept;
     end
 end
+
+
+
+raw = dir(path_raw);
+label = ["41005",'41006','41007','41008','air scan1','air scan1','air scan2','air scan3','air scan4','air scan5','air scan6','air scan7','air scan8','air scan9','air scan10'];
+
+for i = 3:numel(raw)
+    data.raw_sino(i-2).file = load(raw(i).name);
+    data.raw_sino(i-2).name = label(i-2);
+end
+
 
 %% segmentation
 
