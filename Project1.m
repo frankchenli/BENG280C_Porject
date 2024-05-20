@@ -41,7 +41,7 @@ img_size=1024;
 num_views=984;
 
 scan_num = 1;
-air_num = 5;
+air_num = 9;
 
 
 
@@ -86,7 +86,7 @@ mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
 
 %% Normalization
 sino = target;
-mA_matrix = ones(size(sino));
+% mA_matrix = ones(size(sino));
 
 n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
 
@@ -102,7 +102,7 @@ n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
 
 recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
 recon_rot = imrotate(recon,-100);
-imshow(recon_rot,[0.005 0.02]);
+imshow(recon_rot,[0.01 0.06]);
 figure;
 imshow(data.image(128).each_image,[-150 150])
 
