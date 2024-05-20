@@ -37,11 +37,12 @@ end
 % Set Recon Parameters
 angle_shift=0; % Used to define theta as 0 (rotate images during iRadon)
 img_list=[0]; %the code will stop if it runs out of data
-img_size=512;
+img_size=1024;
 num_views=984;
 
-air_num = 5;
 scan_num = 1;
+air_num = 5;
+
 
 
 %% segmentation
@@ -58,9 +59,9 @@ mA = data.raw_sino(scan_num).file.mA;
 air_sino = squeeze(data.raw_sino(air_num).file.central_data(:,1,1:c));
 air_mA = data.raw_sino(air_num).file.mA(1:c);
 
-% mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
+mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
 
-mA_matrix = repmat(mA,1,size(target,1)).';
+% mA_matrix = repmat(mA,1,size(target,1)).';
 
 % for i = 1:14
 %     figure;
@@ -85,6 +86,7 @@ mA_matrix = repmat(mA,1,size(target,1)).';
 
 %% Normalization
 sino = target;
+mA_matrix = ones(size(sino));
 
 n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
 
@@ -98,8 +100,11 @@ n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
 
 %% Recon
 
-[FBP_result] = ref_recon_parallel_beam(p_sino,angle_shift,img_list,img_size,num_views);
-
+recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
+recon_rot = imrotate(recon,-100);
+imshow(recon_rot,[0.005 0.02]);
+figure;
+imshow(data.image(128).each_image,[-150 150])
 
 
 
