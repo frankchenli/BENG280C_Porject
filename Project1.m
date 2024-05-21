@@ -41,7 +41,7 @@ img_size=1024;
 num_views=984;
 
 scan_num = 1;
-air_num = 9;
+air_num = ;
 
 
 
@@ -68,7 +68,7 @@ mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
 %     imshow(squeeze(data.raw_sino(i).file.central_data(:,1,:)),[])
 % end
 
-% for i = 1:14
+% for i = 1:4
 %     figure;
 %     plot(data.raw_sino(i).file.mA);
 % end
@@ -102,9 +102,11 @@ n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
 
 recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
 recon_rot = imrotate(recon,-100);
-imshow(recon_rot,[0.01 0.06]);
+% imshow(recon_rot,[0.01 0.06]);
+imshow(recon_rot,[0.0045 0.008]);
 figure;
-imshow(data.image(128).each_image,[-150 150])
+imshow(data.image(128).each_image,[-150 150]);
+title('ground truth')
 
 
 
