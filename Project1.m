@@ -41,7 +41,7 @@ img_size=1024;
 num_views=984;
 
 scan_num = 1;
-air_num = ;
+air_num = 5;
 
 
 
@@ -55,13 +55,14 @@ mA = data.raw_sino(scan_num).file.mA;
 
 [r,c] = size(target);
 
-
+ 
 air_sino = squeeze(data.raw_sino(air_num).file.central_data(:,1,1:c));
 air_mA = data.raw_sino(air_num).file.mA(1:c);
 
 mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
 
 % mA_matrix = repmat(mA,1,size(target,1)).';
+
 
 % for i = 1:14
 %     figure;
@@ -75,10 +76,29 @@ mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
 
 
 
-% close all
+% for air_num = 5:14
+%     air_sino(:,:,air_num-4) = (data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2;
+%     air_mA(:,air_num-4) = data.raw_sino(air_num).file.mA(1:c);
+%     mA_matrix(:,:,air_num-4) = repmat(mA./air_mA(:,air_num-4),1,size(target,1)).';
+% end
+% 
+% sino = target;
+% for i = 1:10
+%     n_sino = perform_log_normalization(sino,air_sino(:,:,i),mA_matrix(:,:,i));
+%     [p_sino,sino_thetas] = convert_to_parallel_wrapper(n_sino,num_views);
+%     recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
+%     recon_rot = imrotate(recon,-100);
+%     final(:,:,i) = recon_rot;
+% end
+% 
+% 
+% close all;
 % for i = 1:10
 %     figure;
-%     imshow(data(1).image(i).each_image,[-150 150]);
+%     % imshow(final(:,:,i),[0.003,0.0045]);
+%     % imshow(final(:,:,i),[0.03,0.06])
+%     % imshow(final(:,:,i),[0.015,0.03])
+%     imshow(final(:,:,i),[0.02,0.03])
 % end
 
 
