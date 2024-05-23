@@ -45,7 +45,7 @@ air_num = 5;
 
 
 
-%% segmentation
+%% Air Scan
 
 
 
@@ -56,19 +56,32 @@ mA = data.raw_sino(scan_num).file.mA;
 [r,c] = size(target);
 
  
-air_sino = squeeze(data.raw_sino(air_num).file.central_data(:,1,1:c));
+air_sino =(data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2;
+
+
 
 for k = 1%:size(air_sino,2)
     slice = air_sino(:,k);
-    sliceflip = max(slice)-slice;
-    [pks,locs] = findpeaks(sliceflip);
+    [pk,loc] = findpeaks(-slice);
+    thre = pk>-400000;
+    dents = loc(thre);
+    pk = pk(thre);
+    
+    ispeak = false(size(slice));
+    ispeak(dents) = true;
+    non = find(~ispeak);
+    % plot(l,slice)
+    % hold on
+    % plot(l(dents),-pk,"o")
+
+    inter = interp1(non,slice(non),dents);
+    result = slice;
+    result(dents) = inter;
 end
 
-plot(sliceflip)
+plot(result);
 hold on
-plot(locs,pks,"o");
-xlabel("Year")
-ylabel("Sunspot Number")
+plot(slice);
 
 
 air_mA = data.raw_sino(air_num).file.mA(1:c);
@@ -120,6 +133,9 @@ mA_matrix = repmat(mA'./air_mA',size(target,1),1);
 %     % imshow(final(:,:,i),[0.015,0.03])
 %     imshow(final(:,:,i),[0.02,0.03])
 % end
+
+
+%% Air Scan Correction
 
 
 
