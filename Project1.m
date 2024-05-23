@@ -24,7 +24,7 @@ for i = 1
 end
 
 raw = dir(path_raw);
-label = ["41005",'41006','41007','41008','air scan1','air scan1','air scan2','air scan3','air scan4','air scan5','air scan6','air scan7','air scan8','air scan9','air scan10'];
+label = ["41005",'41006','41007','41009','air scan1','air scan1','air scan2','air scan3','air scan4','air scan5','air scan6','air scan7','air scan8','air scan9','air scan10'];
 
 for i = 3:numel(raw)
     data.raw_sino(i-2).file = load(raw(i).name);
@@ -57,11 +57,28 @@ mA = data.raw_sino(scan_num).file.mA;
 
  
 air_sino = squeeze(data.raw_sino(air_num).file.central_data(:,1,1:c));
+
+for k = 1%:size(air_sino,2)
+    slice = air_sino(:,k);
+    sliceflip = max(slice)-slice;
+    [pks,locs] = findpeaks(sliceflip);
+end
+
+plot(sliceflip)
+hold on
+plot(locs,pks,"o");
+xlabel("Year")
+ylabel("Sunspot Number")
+
+
 air_mA = data.raw_sino(air_num).file.mA(1:c);
 
-mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
+mA_matrix = repmat(mA'./air_mA',size(target,1),1);
+
+
 
 % mA_matrix = repmat(mA,1,size(target,1)).';
+
 
 
 % for i = 1:14
@@ -75,7 +92,6 @@ mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
 % end
 
 
-
 % for air_num = 5:14
 %     air_sino(:,:,air_num-4) = (data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2;
 %     air_mA(:,air_num-4) = data.raw_sino(air_num).file.mA(1:c);
@@ -87,10 +103,14 @@ mA_matrix = repmat(mA./air_mA,1,size(target,1)).';
 %     n_sino = perform_log_normalization(sino,air_sino(:,:,i),mA_matrix(:,:,i));
 %     [p_sino,sino_thetas] = convert_to_parallel_wrapper(n_sino,num_views);
 %     recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
-%     recon_rot = imrotate(recon,-100);
+%     recon_rot = imrotate(recon,-40);
 %     final(:,:,i) = recon_rot;
 % end
 % 
+% for i  = 1:10
+%     dicomwrite(final(:,:,i),['final4' num2str(i) '.dcm']);
+% end
+
 % 
 % close all;
 % for i = 1:10
@@ -123,7 +143,7 @@ n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
 recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
 recon_rot = imrotate(recon,-100);
 % imshow(recon_rot,[0.01 0.06]);
-imshow(recon_rot,[0.0045 0.008]);
+imshow(recon_rot,[0.005 0.007]);
 figure;
 imshow(data.image(128).each_image,[-150 150]);
 title('ground truth')
