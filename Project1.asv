@@ -94,7 +94,7 @@ mA_matrix = repmat(mA'./air_mA',size(target,1),1);
 
 
 for air_num = 5:14
-    air_sino(:,:,air_num-4) = squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2);
+    air_sino(:,:,air_num-4) = interpolation(squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2));
     air_mA(:,air_num-4) = data.raw_sino(air_num).file.mA(1:c);
     mA_matrix(:,:,air_num-4) = repmat(mA./air_mA(:,air_num-4),1,size(target,1)).';
 end
