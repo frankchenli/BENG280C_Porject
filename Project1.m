@@ -57,7 +57,42 @@ mA = data.raw_sino(scan_num).file.mA;
 
 air_sino =squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2);
 %% Interpolation
-cor_air_sion = interpolation(air_sino);
+
+
+cor_air_sino = [];
+iter = 1;
+for k = 1:size(air_sino,2)
+    slice = air_sino(:,k);
+    slice_scan = target(:,k);
+    w = 3;
+    for j = 1:iter
+        [pk,loc] = findpeaks(-slice);
+        a = 1;
+        for i = 1:length(pk)
+            if loc(i) <= w
+                m = mean(slice((abs(loc(1)):(loc(i)+w))));
+            elseif loc(i) > length(pk)-w
+                m = mean(slice((abs(loc(i)-w)):(loc(end))));
+            else
+                m = mean(slice((abs(loc(i)-w)):(loc(i)+w)));
+            end
+            thre = abs(pk(i)+m);
+            if thre > abs(pk(i))
+                peak(a) = pk(i);
+                dents(a) = loc(i);
+                a = a+1;
+            end
+        end
+    end
+
+
+end
+
+l = 1:length(slice_scan);
+plot(l,slice);hold on; plot(l(dents),slice(dents),'o')
+
+
+cor_air_sion = interpolation(air_sino,target);
 
 % plot(result);
 % hold on
