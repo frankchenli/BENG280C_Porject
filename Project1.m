@@ -41,13 +41,11 @@ img_size=1024;
 num_views=984;
 
 scan_num = 1;
-air_num = 9;
+air_num = 5;
 
 
 
 %% Air Scan
-
-
 
 targe = data.raw_sino(scan_num).file.central_data;
 target = squeeze(targe(:,1,:));
@@ -56,54 +54,63 @@ mA = data.raw_sino(scan_num).file.mA;
 [r,c] = size(target);
 
 air_sino =squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2);
-%% Interpolation
 
 
-cor_air_sino = [];
-iter = 1;
+%% Data Correction
+
+cor_air = [];
+cor_scan = [];
 for k = 1:size(air_sino,2)
+
     slice = air_sino(:,k);
     slice_scan = target(:,k);
-    w = 3;
-    for j = 1:iter
-        [pk,loc] = findpeaks(-slice);
-        a = 1;
-        for i = 1:length(pk)
-            if loc(i) <= w
-                m = mean(slice((abs(loc(1)):(loc(i)+w))));
-            elseif loc(i) > length(pk)-w
-                m = mean(slice((abs(loc(i)-w)):(loc(end))));
-            else
-                m = mean(slice((abs(loc(i)-w)):(loc(i)+w)));
-            end
-            thre = abs(pk(i)+m);
-            if thre > abs(pk(i))
-                peak(a) = pk(i);
-                dents(a) = loc(i);
-                a = a+1;
-            end
-        end
-    end
+    cor = smooth(slice,20);
+    diff = cor-slice;
+    thre = diff>0.1*max(diff);
+    dents = find(thre);
+    other = find(~thre);
+    pk = diff(thre);
+    inter = interp1(other,slice_scan(other),dents,'linear');
+    result = slice_scan;
+    result(dents) = inter;
 
+    cor_scan(:,k) = result;
+    cor_air(:,k) = cor;
 
 end
 
-l = 1:length(slice_scan);
-plot(l,slice);hold on; plot(l(dents),slice(dents),'o')
 
 
-cor_air_sion = interpolation(air_sino,target);
-
+% l = 1:length(slice_scan);
+% plot(l,slice);hold on; plot(l(dents),slice(dents),'o')
+% 
+% plot(slice_scan);
+% figure;
 % plot(result);
-% hold on
-% plot(air_sino(:,1039));
+% figure;
+% plot(smooth(slice_scan,5));
+
+
+% slice = air_sino(:,300);
+% slice_scan = target(:,1);
+% cor = smooth(slice,20);
+% diff = cor-slice;
+% % plot(cor);hold on; plot(slice);
+% % figure;
+% % plot(diff);
+% 
+% thre = diff>0.1*max(diff);
+% dents = find(thre);
+% pk = diff(thre);
+% 
+% 
+% l = 1:length(slice_scan);
+% plot(l,diff);hold on; plot(l(dents),diff(dents),'o')
+% 
+% plot(l,slice);hold on; plot(l(dents),slice(dents),'o')
 
 
 
-% l = 1:length(slice);
-% plot(l,-slice)
-% hold on
-% plot(l(dents),pk,"o");
 
 
 %% Air Scan
@@ -112,40 +119,24 @@ air_mA = data.raw_sino(air_num).file.mA(1:c);
 mA_matrix = repmat(mA'./air_mA',size(target,1),1);
 
 
-
-% mA_matrix = repmat(mA,1,size(target,1)).';
-
-
-
-% for i = 1:14
-%     figure;
-%     imshow(squeeze(data.raw_sino(i).file.central_data(:,1,:)),[])
+% for air_num = 5:14
+%     air_sino(:,:,air_num-4) = squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2);
+%     air_mA(:,air_num-4) = data.raw_sino(air_num).file.mA(1:c);
+%     mA_matrix(:,:,air_num-4) = repmat(mA./air_mA(:,air_num-4),1,size(target,1)).';
 % end
-
-% for i = 1:4
-%     figure;
-%     plot(data.raw_sino(i).file.mA);
+% 
+% sino = target;
+% for i = 1:10
+%     n_sino = perform_log_normalization(sino,air_sino(:,:,i),mA_matrix(:,:,i));
+%     [p_sino,sino_thetas] = convert_to_parallel_wrapper(n_sino,num_views);
+%     recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
+%     recon_rot = imrotate(recon,-40);
+%     final(:,:,i) = recon_rot;
 % end
-
-
-for air_num = 5:14
-    air_sino(:,:,air_num-4) = squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2);
-    air_mA(:,air_num-4) = data.raw_sino(air_num).file.mA(1:c);
-    mA_matrix(:,:,air_num-4) = repmat(mA./air_mA(:,air_num-4),1,size(target,1)).';
-end
-
-sino = target;
-for i = 1:10
-    n_sino = perform_log_normalization(sino,air_sino(:,:,i),mA_matrix(:,:,i));
-    [p_sino,sino_thetas] = convert_to_parallel_wrapper(n_sino,num_views);
-    recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
-    recon_rot = imrotate(recon,-40);
-    final(:,:,i) = recon_rot;
-end
-
-for i  = 1:10
-    dicomwrite(final(:,:,i),['final4' num2str(i) '.dcm']);
-end
+% 
+% for i  = 1:10
+%     dicomwrite(final(:,:,i),['final4' num2str(i) '.dcm']);
+% end
 
 % 
 % close all;
@@ -158,18 +149,14 @@ end
 % end
 
 
-%% Air Scan Correction
-
-
-
 
 %% Normalization
-sino = target;
-% mA_matrix = ones(size(sino));
+sino = cor_scan;
 
-n_sino = perform_log_normalization(sino,air_sino,mA_matrix);
+n_sino = perform_log_normalization(sino,cor_air,mA_matrix);
 
 
+n_sino = perform_log_normalization(target,air_sino,mA_matrix);
 
 %% Fan to parallel
 
@@ -190,7 +177,7 @@ title('ground truth')
 
 
 
-dicomwrite(recon_rot,'final.dcm');
+dicomwrite(recon_rot,'final_non.dcm');
 
 
 
