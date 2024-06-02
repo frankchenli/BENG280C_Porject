@@ -156,7 +156,7 @@ sino = cor_scan;
 n_sino = perform_log_normalization(sino,cor_air,mA_matrix);
 
 
-n_sino = perform_log_normalization(target,air_sino,mA_matrix);
+% n_sino = perform_log_normalization(target,air_sino,mA_matrix);
 
 %% Fan to parallel
 
@@ -177,10 +177,10 @@ title('ground truth')
 
 
 
-dicomwrite(recon_rot,'final_non.dcm');
+dicomwrite(recon_rot,'final.dcm');
 
 
-%% Algebric Iterative Reconsutrcution
+%% Algebric Iterative Reconsutrcution 
 
 img_size = 877;
 A       = @(x) radon(x, sino_thetas);
