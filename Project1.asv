@@ -196,6 +196,7 @@ x0 = gpuArray(x0);
 lambda  = 1;
 iter = 100;
 recon_iter = art_recon(A,AT,y,x0,lambda,iter);
+
 recon_iter_rot = imrotate(recon,-100);
 dicomwrite(recon_iter_rot,'recon_iter.dcm');
 
