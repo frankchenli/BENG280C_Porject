@@ -14,14 +14,14 @@ addpath(path_dcm);
 addpath(path_ref);
 addpath(path_func);
 
-for i = 1
-    file = dir([path_dcm,'/*.dcm']);
-    for j = 1:numel(file)
-        data.image(j).each_image = dicomread(file(j).name);
-        data.image(j).info = dicominfo(file(j).name);
-        data.image(j).each_image = (data(i).image(j).each_image*data(i).image(j).info.RescaleSlope)+data(i).image(j).info.RescaleIntercept;
-    end
-end
+% for i = 1
+%     file = dir([path_dcm,'/*.dcm']);
+%     for j = 1:numel(file)
+%         data.image(j).each_image = dicomread(file(j).name);
+%         data.image(j).info = dicominfo(file(j).name);
+%         data.image(j).each_image = (data(i).image(j).each_image*data(i).image(j).info.RescaleSlope)+data(i).image(j).info.RescaleIntercept;
+%     end
+% end
 
 raw = dir(path_raw);
 label = ["41005",'41006','41007','41009','air scan1','air scan1','air scan2','air scan3','air scan4','air scan5','air scan6','air scan7','air scan8','air scan9','air scan10'];
@@ -88,7 +88,11 @@ end
 
 
 % l = 1:length(slice_scan);
-% plot(l,slice_scan);hold on; plot(l(dents),slice_scan(dents),'o')
+% plot(l,slice_scan);
+% hold on; plot(l(dents),slice_scan(dents),'*')
+% 
+% plot(cor_scan(:,end));
+
 
 
 
@@ -113,31 +117,36 @@ recon_rot = imrotate(recon*10^4,-100);
 
 
 % imshow(recon_rot,[0.01 0.06]);
-% imshow(recon_rot,[50 80]);
+imshow(recon_rot,[40 80]);
 % figure;
 % imshow(data.image(128).each_image,[-150 150]); 
 % title('ground truth')
+% dicomwrite(recon_rot,'corrected.dcm');
 
 
 
 %% Algebric Iterative Reconsutrcution 
 
-img_size = 877;
-A       = @(x) radon(x, sino_thetas);
-% A       = @(x) ref_recon_parallel_beam(x,sino_thetas,angle_shift,img_list,img_size,num_views);
-AT      = @(y) iradon(y, sino_thetas, 'none', img_size);
-
-y = p_sino;
-x0 = zeros(img_size,img_size);
-y = gpuArray(y);
-x0 = gpuArray(x0);
-
-
-lambda  = 1;
-iter = 100;
-recon_iter = art_recon(A,AT,y,x0,lambda,iter);
-recon_iter_rot = imrotate(recon,-100);
-% dicomwrite(recon_iter_rot,'recon_iter.dcm');
+% img_size = 877;
+% A       = @(x) radon(x, sino_thetas);
+% % A       = @(x) ref_recon_parallel_beam(x,sino_thetas,angle_shift,img_list,img_size,num_views);
+% AT      = @(y) iradon(y, sino_thetas, 'none', img_size);
+% 
+% y = p_sino;
+% x0 = zeros(img_size,img_size);
+% y = gpuArray(y);
+% x0 = gpuArray(x0);
+% 
+% 
+% lambda  = 1;
+% iter = 100;
+% recon_iter = art_recon(A,AT,y,x0,lambda,iter);
+% recon_iter_rot = imrotate(recon,-100);
+% % dicomwrite(recon_iter_rot,'recon_iter.dcm');
+% imshow(recon_iter_rot,[0.004 0.008]);
+% figure;
+% imshow(recon_rot,[0.004 0.008]);
+% % save('iter_result.mat','recon_iter_rot');
 
 
 
