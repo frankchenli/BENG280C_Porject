@@ -103,10 +103,7 @@ n_sino = perform_log_normalization(sino,cor_air,mA_matrix);
 %% Fan to parallel
 
 [p_sino,sino_thetas] = convert_to_parallel_wrapper(n_sino,num_views);
-% [p_sino,sino_thetas] = ref_convert_to_parallel(n_sino);
 
-% a = p_sino;
-% a(470,:) = 1;
 
 
 %% Recon
