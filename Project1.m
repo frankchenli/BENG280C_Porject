@@ -55,6 +55,11 @@ mA = data.raw_sino(scan_num).file.mA;
 
 air_sino =squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2);
 
+air_mA = data.raw_sino(air_num).file.mA(1:c);
+
+mA_matrix = repmat(mA'./air_mA',size(target,1),1);
+
+
 
 %% Data Correction
 
@@ -86,10 +91,6 @@ end
 % plot(l,slice_scan);hold on; plot(l(dents),slice_scan(dents),'o')
 
 
-%% Air Scan
-air_mA = data.raw_sino(air_num).file.mA(1:c);
-
-mA_matrix = repmat(mA'./air_mA',size(target,1),1);
 
 
 %% Normalization
