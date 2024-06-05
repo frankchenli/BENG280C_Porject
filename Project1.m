@@ -84,34 +84,6 @@ end
 
 % l = 1:length(slice_scan);
 % plot(l,slice_scan);hold on; plot(l(dents),slice_scan(dents),'o')
-% 
-% plot(slice_scan);
-% figure;
-% plot(result);
-% figure;
-% plot(smooth(slice_scan,5));
-
-
-% slice = air_sino(:,300);
-% slice_scan = target(:,1);
-% cor = smooth(slice,20);
-% diff = cor-slice;
-% % plot(cor);hold on; plot(slice);
-% % figure;
-% % plot(diff);
-% 
-% thre = diff>0.1*max(diff);
-% dents = find(thre);
-% pk = diff(thre);
-% 
-% 
-% l = 1:length(slice_scan);
-% plot(l,diff);hold on; plot(l(dents),diff(dents),'o')
-% 
-% plot(l,slice);hold on; plot(l(dents),slice(dents),'o')
-
-
-
 
 
 %% Air Scan
@@ -120,50 +92,12 @@ air_mA = data.raw_sino(air_num).file.mA(1:c);
 mA_matrix = repmat(mA'./air_mA',size(target,1),1);
 
 
-% for air_num = 5:14
-%     air_sino(:,:,air_num-4) = squeeze((data.raw_sino(air_num).file.central_data(:,1,1:c)+data.raw_sino(air_num).file.central_data(:,2,1:c))/2);
-%     air_mA(:,air_num-4) = data.raw_sino(air_num).file.mA(1:c);
-%     mA_matrix(:,:,air_num-4) = repmat(mA./air_mA(:,air_num-4),1,size(target,1)).';
-% end
-% 
-% sino = target;
-% for i = 1:10
-%     n_sino = perform_log_normalization(sino,air_sino(:,:,i),mA_matrix(:,:,i));
-%     [p_sino,sino_thetas] = convert_to_parallel_wrapper(n_sino,num_views);
-%     recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
-%     recon_rot = imrotate(recon,-40);
-%     final(:,:,i) = recon_rot;
-% end
-% 
-% for i  = 1:10
-%     dicomwrite(final(:,:,i),['final4' num2str(i) '.dcm']);
-% end
-
-% 
-% close all;
-% for i = 1:10
-%     figure;
-%     % imshow(final(:,:,i),[0.003,0.0045]);
-%     % imshow(final(:,:,i),[0.03,0.06])
-%     % imshow(final(:,:,i),[0.015,0.03])
-%     imshow(final(:,:,i),[0.02,0.03])
-% end
-
-
-
 %% Normalization
 sino = cor_scan;
 
 n_sino = perform_log_normalization(sino,cor_air,mA_matrix);
 
 
-
-% n_cols=size(n_sino,2);
-% offset=round((n_cols-num_views)/2);
-% ext = [n_sino(:,offset:offset+num_views) n_sino(:,offset:end-offset)];
-
-
-% n_sino = perform_log_normalization(target,air_sino,mA_matrix);
 
 %% Fan to parallel
 
@@ -178,16 +112,14 @@ n_sino = perform_log_normalization(sino,cor_air,mA_matrix);
 
 recon= ref_recon_parallel_beam(p_sino,sino_thetas,angle_shift,img_list,img_size,num_views);
 recon_rot = imrotate(recon*10^4,-100);
+
+
 % imshow(recon_rot,[0.01 0.06]);
-imshow(recon_rot,[50 80]);
-figure;
-imshow(data.image(128).each_image,[-150 150]); 
-title('ground truth')
+% imshow(recon_rot,[50 80]);
+% figure;
+% imshow(data.image(128).each_image,[-150 150]); 
+% title('ground truth')
 
-
-
-
-dicomwrite(recon_rot,'final2.dcm');
 
 
 %% Algebric Iterative Reconsutrcution 
@@ -207,11 +139,11 @@ lambda  = 1;
 iter = 100;
 recon_iter = art_recon(A,AT,y,x0,lambda,iter);
 recon_iter_rot = imrotate(recon,-100);
-dicomwrite(recon_iter_rot,'recon_iter.dcm');
+% dicomwrite(recon_iter_rot,'recon_iter.dcm');
 
 
 
-%% Scaling 
+%% Scaling Part1
 
 
 heart = recon_rot(481:707,464:714);
