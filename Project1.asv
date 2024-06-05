@@ -255,7 +255,9 @@ v = sum(sum(tissue))/sum(sum(smk));
 ratio = 40/v;
 tissue = tissue*ratio;
 
+
 result = tissue+air+bone+fat;
+imshow(result,[-150 150]);
 
 %% Part2
 
@@ -306,8 +308,10 @@ tissue = tissue*ratio;
 
 result2 = tissue+air+bone+fat;
 result2(42:268,65:315) = result;
-imshow(result2,[-150 200]);
+imshow(result2,[-200 150]);
 
+
+dicomwrite(recon_iter_rot,'recon_iter.dcm');
 
 
 
